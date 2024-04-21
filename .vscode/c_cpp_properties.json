@@ -10,6 +10,7 @@
             "includePath": [
                 "/Users/Ricardo/Documents/Developer/Git/NimGame/include",
                 "/Users/Ricardo/Documents/Developer/Git/NimGame/src",
+                "/Users/Ricardo/Documents/Developer/Git/NimGame/.pio/libdeps/megaatmega2560/LedControl/src",
                 "/Users/Ricardo/Documents/Developer/Git/NimGame/.pio/libdeps/megaatmega2560/LiquidCrystal_I2C",
                 "/Users/Ricardo/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
                 "/Users/Ricardo/Documents/Developer/Git/NimGame/.pio/libdeps/megaatmega2560/Keypad/src",
@@ -26,6 +27,7 @@
                 "path": [
                     "/Users/Ricardo/Documents/Developer/Git/NimGame/include",
                     "/Users/Ricardo/Documents/Developer/Git/NimGame/src",
+                    "/Users/Ricardo/Documents/Developer/Git/NimGame/.pio/libdeps/megaatmega2560/LedControl/src",
                     "/Users/Ricardo/Documents/Developer/Git/NimGame/.pio/libdeps/megaatmega2560/LiquidCrystal_I2C",
                     "/Users/Ricardo/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
                     "/Users/Ricardo/Documents/Developer/Git/NimGame/.pio/libdeps/megaatmega2560/Keypad/src",
