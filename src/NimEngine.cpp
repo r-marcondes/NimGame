@@ -2,11 +2,17 @@
 
 CNimEngine::CNimEngine()
 {
+    reset();
+}
+
+void CNimEngine::reset()
+{
     piles[0] = 3;
     piles[1] = 5;
     piles[2] = 7;
 
     playerOneTurn = true;
+    isLastPile = false;
     gameStatus = PLAYER_CHOOSE_PILE;
 }
 
@@ -24,11 +30,37 @@ int CNimEngine::choosePile(int pile)
     return MOVE_ERROR;
 }
 
+void CNimEngine::checkLastPile()
+{
+    int count = 0;
+    for(int i = 0; i < NUM_PILES; i++)
+        if(piles[i] == 0)
+            count++;
+    if(count > 1)
+        isLastPile = true;
+}
+
+bool CNimEngine::checkEndGame()
+{
+    int count = 0;
+    for(int i = 0; i < NUM_PILES; i++)
+        count += piles[i];
+    if(count == 1)
+        return true;
+    return false;
+}
+
 int CNimEngine::makeMove(int number_of_pieces)
 {
-    if(piles[chosenPile] >= number_of_pieces)
+    if((!isLastPile && piles[chosenPile] >= number_of_pieces) || (isLastPile && piles[chosenPile] > number_of_pieces))
     {
         piles[chosenPile] -= number_of_pieces;
+        if (checkEndGame())
+        {
+            gameStatus = END_GAME;
+            return END_GAME;
+        }
+        checkLastPile();
         gameStatus = PLAYER_CHOOSE_PILE;
         playerOneTurn = !playerOneTurn;
         

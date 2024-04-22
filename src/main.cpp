@@ -16,8 +16,8 @@ Libraries:
 
 #include <Arduino.h>
 #include <Keypad.h>
-#include <LiquidCrystal_I2C.h>
 #include "NimLedDisplay.h"
+#include "NimLCD.h"
 #include "NimEngine.h"
 
 //Constants
@@ -38,8 +38,8 @@ char keys[NUM_KEY_ROWS][NUM_KEY_COLS] = {
 
 //Components objects
 Keypad keypad = Keypad(makeKeymap(keys), keyRowPins, keyColPins, NUM_KEY_ROWS, NUM_KEY_COLS);
-LiquidCrystal_I2C lcd(0x27, 20, 4);
 CNimLedDisplay ledcntrl = CNimLedDisplay();
+CNimLCD lcd = CNimLCD();
 
 //Game Engine object
 CNimEngine game = CNimEngine();
@@ -50,19 +50,13 @@ void setup()
   //Serial.begin(9600);
 
   //LCD setup
-  lcd.init(); 
-  lcd.backlight();
-  lcd.setCursor(0, 0);
-  lcd.print("**** Nim Game!! ****");
-  lcd.setCursor(0, 1);
-  lcd.print("PLAYER 1");
-  lcd.setCursor(0, 2);
-  lcd.print("Choose pile (A,B,C):");
+  lcd.setup();
+  lcd.initScreen();
 
   //Led matrix setup
   ledcntrl.setup();
   ledcntrl.setPiles(game.getPile(0), game.getPile(1), game.getPile(2));
- }
+}
 
 void loop() 
 {
@@ -72,9 +66,16 @@ void loop()
 
   if(key_input)
   {
-    Serial.println(key_input);
-    lcd.setCursor(0, 3);
-    lcd.print(key_input);
+    //Serial.println(key_input);
+    lcd.input(key_input);
+    
+    if(key_input == '*') //Entering '*' key resets the game
+    {
+      game.reset();
+      ledcntrl.setPiles(game.getPile(0), game.getPile(1), game.getPile(2));
+      lcd.initScreen();
+      return;
+    }
 
     if(game.getStatus() == PLAYER_CHOOSE_PILE)
     {
@@ -94,18 +95,11 @@ void loop()
       }
       if(res == MOVE_ERROR)
       {
-        lcd.setCursor(0, 2);
-        lcd.print("Not a valid pile!   ");
-        delay(1000);
-        lcd.setCursor(0, 2);
-        lcd.print("Choose pile (A,B,C):");
+        lcd.pileError();
       }
       else
       {
-        lcd.setCursor(0, 2);
-        lcd.print("# of pieces from ");
-        lcd.setCursor(17, 2);
-        lcd.print(key_input);
+        lcd.requestPieces(key_input);
       }
     }
     else if(game.getStatus() == PLAYER_CHOOSE_PIECES)
@@ -118,20 +112,19 @@ void loop()
         if(res != MOVE_ERROR)
         {
           ledcntrl.transitionPiles(game.getPile(0), game.getPile(1), game.getPile(2));
-          lcd.setCursor(7, 1);
-          lcd.print(game.getPlayer());
-          lcd.setCursor(0, 2);
-          lcd.print("Choose pile (A,B,C):");
+          lcd.showPlayer(game.getPlayer());
+          if(res == END_GAME)
+          {
+            lcd.endGame(game.getPlayer());
+          }
+          else
+          {
+            lcd.requestPile();
+          }
           return;        
         }
       }
-      lcd.setCursor(0, 2);
-      lcd.print("Not a valid number! ");
-      delay(1500);
-      lcd.setCursor(0, 2);
-      lcd.print("# of pieces from ");
-      lcd.setCursor(17, 2);
-      lcd.print(game.getChosenPile());
+      lcd.piecesError(game.getChosenPile());
     }
   }
 }

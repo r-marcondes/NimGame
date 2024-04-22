@@ -12,9 +12,13 @@ class CNimEngine
         bool playerOneTurn;
         int piles[NUM_PILES];
         int chosenPile;
+        bool isLastPile;
+        void checkLastPile();
+        bool checkEndGame();
             
     public:
         CNimEngine();
+        void reset();
         int choosePile(int pile);
         int makeMove(int number_of_pieces);
         int getPile(int pile);
