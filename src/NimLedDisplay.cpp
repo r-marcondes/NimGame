@@ -35,9 +35,13 @@ void CNimLedDisplay::setPiles(int a, int b, int c)
 
 void CNimLedDisplay::transitionPiles(int a, int b, int c)
 {
-    showPiles(a, b, c);
-    delay(TRANSITION_TIME_DELAY);
-    showPiles(pileA, pileB, pileC);
-    delay(TRANSITION_TIME_DELAY);
+    //Make remove pieces blink a couple of time before vanishing
+    for(int i = 0; i < 3; i++)
+    {
+        showPiles(a, b, c);
+        delay(TRANSITION_TIME_DELAY);
+        showPiles(pileA, pileB, pileC);
+        delay(TRANSITION_TIME_DELAY);
+    }
     setPiles(a, b, c);
 }
