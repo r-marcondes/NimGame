@@ -16,6 +16,12 @@ class CNimLedDisplay
         int pileA;
         int pileB;
         int pileC;
+        int nextA;
+        int nextB;
+        int nextC;
+        int isBlinking = false;
+        int blinkCount;
+        long prevTime;
 
     public:
         CNimLedDisplay() {};
@@ -23,4 +29,5 @@ class CNimLedDisplay
         void showPiles(int a, int b, int c);
         void setPiles(int a, int b, int c);
         void transitionPiles(int a, int b, int c);
+        bool loop();
 };

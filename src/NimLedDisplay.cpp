@@ -35,13 +35,40 @@ void CNimLedDisplay::setPiles(int a, int b, int c)
 
 void CNimLedDisplay::transitionPiles(int a, int b, int c)
 {
-    //Make remove pieces blink a couple of time before vanishing
-    for(int i = 0; i < 3; i++)
-    {
-        showPiles(a, b, c);
-        delay(TRANSITION_TIME_DELAY);
-        showPiles(pileA, pileB, pileC);
-        delay(TRANSITION_TIME_DELAY);
+    //Sets isBlinking to true to make the removed pieces blink a couple of time before vanishing
+    prevTime = millis();
+    isBlinking = true;
+    nextA = a;
+    nextB = b;
+    nextC = c;
+    blinkCount = 0;
+}
+
+//This method is to be called from the main loop every cycle (so can blink without pausing the code)
+//Returns true if blinking and false if not
+bool CNimLedDisplay::loop()
+{
+    if (isBlinking)
+    {        
+        if(millis() - prevTime > TRANSITION_TIME_DELAY)
+        {
+            prevTime = millis();
+            if (blinkCount == 0 || blinkCount == 2)
+            {
+                showPiles(nextA, nextB, nextC);
+            }
+            else if (blinkCount == 1 || blinkCount == 3)
+            {
+                showPiles(pileA, pileB, pileC);
+            }
+            else
+            {
+                setPiles(nextA, nextB, nextC);//in the last iteraction sets the new piles defenitely
+                isBlinking = false;
+            }
+            blinkCount++;
+        }
+        return true;
     }
-    setPiles(a, b, c);
+    return false;
 }
