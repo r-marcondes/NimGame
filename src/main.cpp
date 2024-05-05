@@ -19,6 +19,7 @@ Libraries:
 #include "NimLedDisplay.h"
 #include "NimLCD.h"
 #include "NimEngine.h"
+#include "Buzzer.h"
 
 //Constants
 #define NUM_KEY_ROWS 4
@@ -27,6 +28,7 @@ Libraries:
 //Pins
 byte keyRowPins[NUM_KEY_ROWS] = {9, 8, 7, 6};
 byte keyColPins[NUM_KEY_COLS] = {5, 4, 3, 2};
+#define BUZZER_PIN 53
 
 //Array with Keys
 char keys[NUM_KEY_ROWS][NUM_KEY_COLS] = {
@@ -36,10 +38,26 @@ char keys[NUM_KEY_ROWS][NUM_KEY_COLS] = {
 {'*', '0', '#', 'D'}
 };
 
+//Sounds
+char startGameNotes[9] = "ceg ceg";
+int startGameBeats[7] = {1,1,1,1,1,1,1};
+char pressKeyNotes[2] = "b";
+int pressKeyBeats[1] = {1};
+char moveNotes[6] = "c c g";
+int moveBeats[5] = {2, 2, 2, 2, 2};
+char errorNotes[4] = "d d";
+int errorBeats[3] = {1, 1, 1};
+char winNotes[12] = "cde def efg";
+int winBeats[11] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+char looseNotes[9] = "AFGEFD C";
+int looseBeats[8] = {1, 1, 1, 1, 1, 1, 2, 2};
+
+
 //Components objects
 Keypad keypad = Keypad(makeKeymap(keys), keyRowPins, keyColPins, NUM_KEY_ROWS, NUM_KEY_COLS);
 CNimLedDisplay ledcntrl = CNimLedDisplay();
 CNimLCD lcd = CNimLCD();
+CBuzzer buzzer = CBuzzer(BUZZER_PIN);
 
 //Game Engine object
 CNimEngine game = CNimEngine();
@@ -50,7 +68,7 @@ bool computerTurn;
 void setup() 
 {
   //Serial monitor for degugging
-  Serial.begin(9600);
+  //Serial.begin(9600);
 
   //LCD setup
   lcd.setup();
@@ -63,6 +81,9 @@ void setup()
 
   //Variables setup
   computerTurn = false;
+
+  //Play start song
+  buzzer.play(startGameNotes, startGameBeats);
 }
 
 void loop() 
@@ -76,6 +97,7 @@ void loop()
   //Calls objects loops (for the objects that have that method)
   r1 = ledcntrl.loop();
   r2 = lcd.loop();
+  buzzer.loop();
   if(r1 || r2)
   {
     return; //wait while objects have activities in their loops
@@ -88,9 +110,11 @@ void loop()
     res = game.computerMakeMove();
     ledcntrl.transitionPiles(game.getPile(0), game.getPile(1), game.getPile(2));
     lcd.setPlayer(game.getPlayer());
+    buzzer.play(moveNotes, moveBeats);
     if(res == END_GAME)
     {
       lcd.computerMove(SCREEN_END_GAME);
+      buzzer.play(looseNotes, looseBeats);
     }
     else
     {
@@ -105,6 +129,7 @@ void loop()
   {
     //Serial.println(key_input);
     lcd.input(key_input);
+    buzzer.play(pressKeyNotes, pressKeyBeats);
     
     if(key_input == '*') //Entering '*' key resets the game
     {
@@ -112,6 +137,7 @@ void loop()
       ledcntrl.setPiles(game.getPile(0), game.getPile(1), game.getPile(2));
       lcd.initScreen();
       lcd.requestMode();
+      buzzer.play(startGameNotes, startGameBeats);
       return;
     }
 
@@ -133,6 +159,7 @@ void loop()
       else
       {
         lcd.modeError();
+        buzzer.play(errorNotes, errorBeats);
       }
     }
     else if(status == SELECT_LEVEL)
@@ -145,6 +172,7 @@ void loop()
       else
       {
         lcd.levelError();
+        buzzer.play(errorNotes, errorBeats);
       }
     }
     else if(status == SELECT_WHO_STARTS)
@@ -165,6 +193,7 @@ void loop()
       else
       {
         lcd.whoStartsError();
+        buzzer.play(errorNotes, errorBeats);
       }
     }
     else if(status == PLAYER_CHOOSE_PILE)
@@ -186,6 +215,7 @@ void loop()
       if(res == MOVE_ERROR)
       {
         lcd.pileError();
+        buzzer.play(errorNotes, errorBeats);
       }
       else
       {
@@ -203,9 +233,11 @@ void loop()
         {
           ledcntrl.transitionPiles(game.getPile(0), game.getPile(1), game.getPile(2));
           lcd.setPlayer(game.getPlayer());
+          buzzer.play(moveNotes, moveBeats);
           if(res == END_GAME)
           {
             lcd.endGame();
+            buzzer.play(winNotes, winBeats);
           }
           else
           {
@@ -222,6 +254,7 @@ void loop()
         }
       }
       lcd.piecesError(game.getChosenPile());
+      buzzer.play(errorNotes, errorBeats);
     }
   }
 }
